@@ -244,6 +244,7 @@ const updateLast = (req, res) => {
 };
 
 const createDog = async (req, res) => {
+
   if (!req.body.name || !req.body.breed || !req.body.age) {
     return res.status(400).json({ error: 'name, breed, and age are all required' });
   }
@@ -264,19 +265,19 @@ const createDog = async (req, res) => {
 };
 
 const increaseDogAge = async (req, res) => {
-  if (!req.query.name) {
+  if (!req.body.name) {
     return res.status(400).json({ error: 'Name is required to perform a search' });
   }
 
   let result;
   try {
-    result = await Dog.findOne({ name: req.query.name }).exec();
+    result = await Dog.findOne({ name: req.body.name }).exec();
   } catch (err) {
     return res.status(500).json({ error: `Something has gone awry:${err}` });
   }
 
   if (!result) {
-    return res.json({ error: `No dogs named ${req.query.name} were found.` });
+    return res.json({ error: `No dogs named ${req.body.name} were found.` });
   }
 
   result.age++;
