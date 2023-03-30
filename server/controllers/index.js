@@ -2,7 +2,7 @@
 const models = require('../models');
 
 // get the Cat model
-const { Cat } = models;
+const { Cat, Dog } = models;
 
 // default fake data so that we have something to work with until we make a real Cat
 const defaultData = {
@@ -234,6 +234,54 @@ const updateLast = (req, res) => {
   });
 };
 
+const createDog = async (req, res) => {
+  if (!req.body.name || !req.body.breed || !req.body.age) {
+    return res.status(400).json({ error: 'name, breed, and age are all required' });
+  }
+
+  const dogData = {
+    name: req.body.name,
+    breed: req.body.breed,
+    age: req.body.age,
+  };
+
+  const newDog = new Dog(dogData);
+  try {
+    await newDog.save();
+  } catch (err) {
+    return res.status(500).json({ error: 'failed to create dog: '+err });
+  }
+  return res.json(dogData);
+};
+
+const increaseDogAge = async (req, res) => {
+  if (!req.query.name) {
+    return res.status(400).json({ error: 'Name is required to perform a search' });
+  }
+
+  let result;
+  try {
+    result = await Dog.findOne({ name: req.query.name }).exec();
+  } catch (err) {
+    return res.status(500).json({ error: 'Something has gone awry:' + err });
+  }
+
+  if (!result) {
+    return res.json({ error: `No dogs named ${req.query.name} were found.`});
+  }
+
+  result.age++;
+  try {
+    await result.save();
+  }
+  catch (err) {
+    return res.status(500).json({ error: `failed to update ${result.name||'this dog'}'s age: `+err });
+
+  }
+
+  return res.json({ name: result.name, breed: result.breed, age: result.age });
+};
+
 // A function to send back the 404 page.
 const notFound = (req, res) => {
   res.status(404).render('notFound', {
@@ -252,4 +300,6 @@ module.exports = {
   updateLast,
   searchName,
   notFound,
+  createDog,
+  increaseDogAge
 };

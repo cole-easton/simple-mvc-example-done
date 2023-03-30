@@ -32,6 +32,10 @@ const router = (app) => {
 
   // When someone POSTS to /updateLast, call controllers.updateLast
   app.post('/updateLast', controllers.updateLast);
+
+  app.post('/createDog', controllers.createDog);
+
+  app.post('/increaseDogAge', controllers.increaseDogAge);
 };
 
 // export the router function
