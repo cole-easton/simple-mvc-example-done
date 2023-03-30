@@ -68,8 +68,7 @@ const hostPage1 = async (req, res) => {
        do not want people to see actual error messages from your server or database, or else
        they can exploit them to attack your server.
     */
-    console.log(err);
-    return res.status(500).json({ error: 'failed to find cats' });
+    return res.status(500).json({ error: `failed to find cats: ${err}` });
   }
 };
 
@@ -81,6 +80,16 @@ const hostPage2 = (req, res) => {
 // Function to render the untemplated page3.
 const hostPage3 = (req, res) => {
   res.render('page3');
+};
+
+// Function to render the untemplated page3.
+const hostPage4 = async (req, res) => {
+  try {
+    const dogs = await Dog.find({}).lean().exec();
+    return res.render('page4', { dogs });
+  } catch (err) {
+    return res.status(500).json({ error: `failed to find dogs: ${err}` });
+  }
 };
 
 // Get name will return the name of the last added cat.
@@ -249,7 +258,7 @@ const createDog = async (req, res) => {
   try {
     await newDog.save();
   } catch (err) {
-    return res.status(500).json({ error: 'failed to create dog: '+err });
+    return res.status(500).json({ error: `failed to create dog: ${err}` });
   }
   return res.json(dogData);
 };
@@ -263,20 +272,18 @@ const increaseDogAge = async (req, res) => {
   try {
     result = await Dog.findOne({ name: req.query.name }).exec();
   } catch (err) {
-    return res.status(500).json({ error: 'Something has gone awry:' + err });
+    return res.status(500).json({ error: `Something has gone awry:${err}` });
   }
 
   if (!result) {
-    return res.json({ error: `No dogs named ${req.query.name} were found.`});
+    return res.json({ error: `No dogs named ${req.query.name} were found.` });
   }
 
   result.age++;
   try {
     await result.save();
-  }
-  catch (err) {
-    return res.status(500).json({ error: `failed to update ${result.name||'this dog'}'s age: `+err });
-
+  } catch (err) {
+    return res.status(500).json({ error: `failed to update ${result.name || 'this dog'}'s age: ${err}` });
   }
 
   return res.json({ name: result.name, breed: result.breed, age: result.age });
@@ -295,11 +302,12 @@ module.exports = {
   page1: hostPage1,
   page2: hostPage2,
   page3: hostPage3,
+  page4: hostPage4,
   getName,
   setName,
   updateLast,
   searchName,
   notFound,
   createDog,
-  increaseDogAge
+  increaseDogAge,
 };
